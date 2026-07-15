@@ -3,7 +3,8 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
-
+console.log("Gemini key exists:", !!process.env.GEMINI_API_KEY);
+console.log("Gemini key starts with:", process.env.GEMINI_API_KEY?.substring(0, 10));
 // ---------------- Ticket Classification ----------------
 
 async function classifyTicket(ticketText) {
