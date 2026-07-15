@@ -1,0 +1,405 @@
+import { useState } from "react";
+import toast from "react-hot-toast";
+import jsPDF from "jspdf";
+import { useStats } from "../context/StatsContext";
+import { useActivity } from "../context/ActivityContext";
+
+function UploadSection() {
+  const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
+
+  const [summary, setSummary] = useState("");
+  const [keyPoints, setKeyPoints] = useState([]);
+
+  const [businessInsights, setBusinessInsights] = useState("");
+  const [risks, setRisks] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [confidence, setConfidence] = useState("");
+
+  // ✅ Add this here
+  const { stats, setStats } = useStats();
+  const { addActivity } = useActivity();
+
+  const handleFileChange = (event) => {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+
+      setSelectedFile(file);
+      setFileName(file.name);
+
+      setSummary("");
+      setKeyPoints([]);
+      setBusinessInsights("");
+      setRisks("");
+      setRecommendations("");
+      setConfidence("");
+    }
+  };
+
+  const analyzeDocument = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a PDF first.");
+      return;
+    }
+
+    setLoading(true);
+    setLoadingText("📤 Uploading document...");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      setLoadingText("📖 Extracting document...");
+
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setLoadingText("🤖 AI is analyzing your document...");
+
+      const data = await res.json();
+
+      console.log(data);
+
+      if (data.success) {
+        setSummary(data.summary || "");
+        setKeyPoints(data.keyPoints || []);
+
+        setBusinessInsights(data.businessInsights || "");
+        setRisks(data.risks || "");
+        setRecommendations(data.recommendations || "");
+        setConfidence(data.confidence || "");
+        setStats({
+  ...stats,
+  documents: stats.documents + 1,
+  confidence: parseInt(data.confidence) || stats.confidence,
+});
+
+        setLoadingText("✅ Summary generated!");
+
+        setTimeout(() => {
+          toast.success("Document analyzed successfully!");
+          addActivity(`📄 ${fileName} analyzed successfully`);
+          setLoading(false);
+          setLoadingText("");
+        }, 800);
+
+        return;
+      }
+
+      toast.error(data.error || "Something went wrong.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Backend not responding.");
+      setLoading(false);
+    }
+  };
+
+  const downloadReport = () => {
+  const doc = new jsPDF();
+
+  let y = 20;
+  const pageHeight = doc.internal.pageSize.height;
+
+  const checkPage = (space = 20) => {
+    if (y + space > pageHeight - 20) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  const addHeading = (title) => {
+    checkPage(20);
+
+    doc.setFillColor(41, 98, 255);
+    doc.rect(15, y - 6, 180, 10, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(15);
+    doc.setFont("helvetica", "bold");
+    doc.text(title, 20, y);
+
+    y += 15;
+
+    doc.setTextColor(0, 0, 0);
+  };
+
+  const addParagraph = (text) => {
+    const lines = doc.splitTextToSize(text || "-", 170);
+
+    checkPage(lines.length * 7);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+
+    doc.text(lines, 20, y);
+
+    y += lines.length * 7 + 10;
+  };
+
+  // ===== Title =====
+
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  doc.text("FlowMind AI", 20, y);
+
+  y += 10;
+
+  doc.setFontSize(14);
+  doc.text("Business Intelligence Report", 20, y);
+
+  y += 15;
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Document: ${fileName}`, 20, y);
+
+  y += 20;
+
+  // ===== Summary =====
+
+  addHeading("AI Summary");
+  addParagraph(summary);
+
+  // ===== Key Insights =====
+
+  addHeading("Key Insights");
+
+  keyPoints.forEach((point) => {
+    const lines = doc.splitTextToSize("• " + point, 165);
+
+    checkPage(lines.length * 7);
+
+    doc.text(lines, 25, y);
+
+    y += lines.length * 7 + 5;
+  });
+
+  y += 10;
+
+  // ===== Business =====
+
+  addHeading("Business Insights");
+  addParagraph(businessInsights);
+
+  // ===== Risks =====
+
+  addHeading("Potential Risks");
+  addParagraph(risks);
+
+  // ===== Recommendations =====
+
+  addHeading("Recommendations");
+  addParagraph(recommendations);
+
+  // ===== Confidence =====
+
+  addHeading("AI Confidence");
+
+  doc.setFontSize(30);
+  doc.setFont("helvetica", "bold");
+  doc.text(confidence || "-", 20, y);
+
+  y += 25;
+
+  doc.setDrawColor(180);
+  doc.line(15, y, 195, y);
+
+  y += 10;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+
+  doc.text(
+    "Generated by FlowMind AI • Intelligent Business Operations Copilot",
+    20,
+    y
+  );
+
+  doc.save("FlowMind_AI_Report.pdf");
+
+  toast.success("Professional report downloaded!");
+};
+  return (
+    <section
+  id="upload"
+  className="bg-slate-900 text-white py-24"
+>
+      <div className="max-w-5xl mx-auto px-6">
+
+        <div className="text-center">
+          <h2 className="text-5xl font-bold">
+           AI Document Intelligence
+          </h2>
+
+          <p className="text-gray-400 mt-5 text-lg">
+            Upload business documents and let ApkaAI generate executive summaries, business insights, recommendations, and risk analysis in seconds.
+          </p>
+        </div>
+
+        <div cclassName="mt-16 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-slate-700 p-14 text-center shadow-2xl hover:border-cyan-500 hover:shadow-cyan-500/10 transition-all duration-300">
+
+      <div className="text-8xl animate-bounce">
+    📄
+</div>
+
+          <h3 className="text-3xl font-semibold mt-6">
+            Drag & Drop Your PDF
+          </h3>
+
+          <p className="text-gray-400 mt-3">
+            or choose a PDF from your computer
+          </p>
+
+          <input
+            type="file"
+            id="fileUpload"
+            accept=".pdf"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          <label
+            htmlFor="fileUpload"
+            className="inline-block mt-8 bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl cursor-pointer font-semibold"
+          >
+            Choose File
+          </label>
+
+          {fileName && (
+            <div className="mt-8">
+
+              <p className="text-green-400 font-medium">
+                Selected File:
+              </p>
+
+              <p className="mt-2">{fileName}</p>
+
+              <p className="text-green-400 mt-3">
+                ✓ File uploaded successfully
+              </p>
+
+              <button
+                onClick={analyzeDocument}
+                disabled={loading}
+                className="mt-6 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-3 mx-auto"
+              >
+                {loading && (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                )}
+
+                {loading ? "Analyzing Document..." : "🤖 AI is Thinking..."}
+              </button>
+
+              {loading && (
+                <p className="mt-4 text-cyan-400 font-medium animate-pulse">
+                  {loadingText}
+                </p>
+              )}
+
+            </div>
+          )}
+
+          {summary && (
+            <div className="mt-10 bg-slate-900 border border-slate-700 rounded-2xl p-8 text-left">
+
+              <h2 className="text-3xl font-bold text-green-400">
+                📄 Executive Summary
+              </h2>
+
+              <p className="mt-5 leading-8 text-gray-300 whitespace-pre-line">
+                {summary}
+              </p>
+<div className="mt-8 text-center">
+
+  <button
+    onClick={downloadReport}
+    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition px-8 py-3 rounded-xl font-semibold shadow-xl">📄 Download AI Report
+  </button>
+
+</div>
+              {keyPoints.length > 0 && (
+                <>
+                  <h2 className="text-2xl font-bold text-blue-400 mt-10">
+                    💡 Key Business Insights
+                  </h2>
+
+                  <div className="grid md:grid-cols-2 gap-4 mt-6">
+                    {keyPoints.map((point, index) => (
+                      <div
+                        key={index}
+                        className="bg-slate-800 rounded-xl p-4 border border-slate-700"
+                      >
+                        ✅ {point}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+            </div>
+          )}
+
+          {businessInsights && (
+            <div className="mt-10 grid md:grid-cols-2 gap-6 text-left">
+
+              <div className="bg-slate-900 border border-blue-600 rounded-2xl p-6">
+                <h3 className="text-2xl font-bold text-blue-400">
+                  💡 Business Insights
+                </h3>
+
+                <p className="mt-4 text-gray-300 leading-7">
+                  {businessInsights}
+                </p>
+              </div>
+
+              <div className="bg-slate-900 border border-red-600 rounded-2xl p-6">
+                <h3 className="text-2xl font-bold text-red-400">
+                  ⚠️ Potential Risks
+                </h3>
+
+                <p className="mt-4 text-gray-300 leading-7">
+                  {risks}
+                </p>
+              </div>
+
+              <div className="bg-slate-900 border border-green-600 rounded-2xl p-6">
+                <h3 className="text-2xl font-bold text-green-400">
+                  📈 Recommendations
+                </h3>
+
+                <p className="mt-4 text-gray-300 leading-7">
+                  {recommendations}
+                </p>
+              </div>
+
+              <div className="bg-slate-900 border border-yellow-600 rounded-2xl p-6 flex flex-col justify-center items-center">
+                <div className="text-5xl">🎯</div>
+
+                <h3 className="text-xl font-bold text-yellow-400 mt-4">
+                  AI Confidence
+                </h3>
+
+                <p className="text-5xl font-bold mt-5">
+                  {confidence}
+                </p>
+              </div>
+
+            </div>
+          )}
+
+        </div>
+        <div className="mt-10 text-center text-gray-500">
+    Powered by ApkaAI • AI Document Intelligence
+</div>
+
+      </div>
+    </section>
+  );
+}
+
+export default UploadSection;
