@@ -126,7 +126,8 @@ ${documentText}
 
   } catch (err) {
     console.log("OpenRouter Summary Error:");
-    console.log(err.response?.data || err.message);
+    console.error("OpenRouter Error:");
+console.error(JSON.stringify(err.response?.data, null, 2));
     throw err;
   }
 

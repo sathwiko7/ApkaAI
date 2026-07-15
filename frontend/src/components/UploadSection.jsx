@@ -292,7 +292,7 @@ function UploadSection() {
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 )}
 
-                {loading ? "Analyzing Document..." : "🤖 AI is Thinking..."}
+                {loading ? "Analyzing Document..." : "🤖 press to analyze..."}
               </button>
 
               {loading && (
