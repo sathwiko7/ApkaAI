@@ -14,6 +14,10 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json({ limit: "2mb" }));
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 app.use("/api", classifyRoute);
 app.use("/api", summarizeRoute);
 app.use("/api/chat", chatRoute);
