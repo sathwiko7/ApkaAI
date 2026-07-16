@@ -17,9 +17,16 @@ router.post("/summarize-document", async (req, res) => {
     const result = await summarizeDocument(text.trim(), length);
     res.json({ success: true, ...result });
   } catch (err) {
-    console.error("[summarize-document] error:", err);
-    res.status(500).json({ error: "Failed to summarize document.", details: err.message });
-  }
+
+    console.log("========== GROQ ERROR ==========");
+    console.log(err.response?.status);
+    console.log(JSON.stringify(err.response?.data, null, 2));
+    console.log(err.message);
+    console.log("================================");
+
+    throw err;
+
+}
 });
 
 module.exports = router;
