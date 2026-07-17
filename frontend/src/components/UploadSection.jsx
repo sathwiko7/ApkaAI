@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import jsPDF from "jspdf";
 import { useStats } from "../context/StatsContext";
 import { useActivity } from "../context/ActivityContext";
-
+const API_URL = import.meta.env.VITE_API_URL;
 function UploadSection() {
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -54,10 +54,10 @@ function UploadSection() {
     try {
       setLoadingText("📖 Extracting document...");
 
-      const res = await fetch("http://localhost:5000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(`${API_URL}/api/upload`, {
+  method: "POST",
+  body: formData,
+});
 
       setLoadingText("🤖 AI is analyzing your document...");
 
@@ -241,7 +241,7 @@ function UploadSection() {
           </p>
         </div>
 
-        <div cclassName="mt-16 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-slate-700 p-14 text-center shadow-2xl hover:border-cyan-500 hover:shadow-cyan-500/10 transition-all duration-300">
+        <div className="mt-16 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-slate-700 p-14 text-center shadow-2xl hover:border-cyan-500 hover:shadow-cyan-500/10 transition-all duration-300">
 
       <div className="text-8xl animate-bounce">
     📄

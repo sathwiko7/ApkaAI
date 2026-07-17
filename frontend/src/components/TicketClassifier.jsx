@@ -9,7 +9,7 @@ function TicketClassifier() {
   const [ticket, setTicket] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-
+const API_URL = import.meta.env.VITE_API_URL;
   const { stats, setStats } = useStats();
   const { addActivity } = useActivity();
 
@@ -22,7 +22,7 @@ function TicketClassifier() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/classify-ticket", {
+      fetch(`${API_URL}/api/classify-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
