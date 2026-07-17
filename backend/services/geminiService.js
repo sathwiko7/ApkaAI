@@ -6,6 +6,7 @@ const MODEL = "llama-3.3-70b-versatile";
 
 const client = axios.create({
   baseURL: "https://api.groq.com/openai/v1",
+  timeout: 30000,
   headers: {
     Authorization: `Bearer ${API_KEY}`,
     "Content-Type": "application/json",
@@ -18,6 +19,10 @@ function stripCodeFences(text) {
     .replace(/```/g, "")
     .trim();
 }
+
+// ======================================================
+// Ticket Classification
+// ======================================================
 
 // ======================================================
 // Ticket Classification
@@ -47,31 +52,34 @@ ${ticketText}
 
   try {
 
+    console.log("🚀 Sending request to Groq...");
+
     response = await client.post("/chat/completions", {
-
       model: MODEL,
-
       temperature: 0.2,
-
       messages: [
         {
           role: "user",
           content: prompt,
         },
       ],
-
     });
+
+    console.log("✅ Groq responded!");
 
   } catch (err) {
 
+    console.error("❌ Groq Error:");
     console.error(err.response?.data || err.message);
 
     throw err;
-
   }
 
   const raw =
     response.data?.choices?.[0]?.message?.content || "";
+
+  console.log("Groq Raw Response:");
+  console.log(raw);
 
   try {
 
@@ -87,8 +95,8 @@ ${ticketText}
 
   }
 
-}
-// ======================================================
+} 
+
 // Document Summarization
 // ======================================================
 
