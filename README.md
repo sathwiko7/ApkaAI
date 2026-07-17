@@ -72,7 +72,7 @@ It allows users to:
 
 ## 🏠 Home Page
 
-C:\Users\sathw\Downloads\ApkaAI\ApkaAI\flowmind-ai\assets\hero.png
+![Hero](assets/hero.png)
 
 ---
 
