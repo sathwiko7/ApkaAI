@@ -4,12 +4,13 @@ import toast from "react-hot-toast";
 import { useStats } from "../context/StatsContext";
 import { useActivity } from "../context/ActivityContext";
 
-
 function TicketClassifier() {
   const [ticket, setTicket] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-const API_URL = import.meta.env.VITE_API_URL;
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const { stats, setStats } = useStats();
   const { addActivity } = useActivity();
 
@@ -22,7 +23,7 @@ const API_URL = import.meta.env.VITE_API_URL;
     setLoading(true);
 
     try {
-      fetch(`${API_URL}/api/classify-ticket`, {
+      const res = await fetch(`${API_URL}/api/classify-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +68,6 @@ const API_URL = import.meta.env.VITE_API_URL;
   return (
     <section className="bg-slate-900 text-white py-24">
       <div className="max-w-5xl mx-auto px-6">
-
         <div className="text-center">
           <h2 className="text-5xl font-bold">
             AI Ticket Classification
@@ -100,9 +100,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
         {result && (
           <div className="mt-10 bg-slate-800 rounded-2xl border border-slate-700 p-8">
-
             <div className="grid md:grid-cols-3 gap-6">
-
               <div>
                 <h3 className="text-green-400 font-bold text-lg">
                   Category
@@ -132,12 +130,9 @@ const API_URL = import.meta.env.VITE_API_URL;
                   {result.reasoning}
                 </p>
               </div>
-
             </div>
-
           </div>
         )}
-
       </div>
     </section>
   );
