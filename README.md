@@ -7,7 +7,7 @@ AI-powered business assistant that helps organizations analyze documents, classi
 
 🌐 **Live Demo:** https://apka-ai.vercel.app
 
-🎥 **Demo Video:** (Add your YouTube Link Here)
+
 
 </div>
 
@@ -72,7 +72,7 @@ It allows users to:
 
 ## 🏠 Home Page
 
-![Hero](assets/hero.png)
+C:\Users\sathw\Downloads\ApkaAI\ApkaAI\flowmind-ai\assets\hero.png
 
 ---
 
