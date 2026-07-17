@@ -212,7 +212,7 @@ flowmind-ai
 
 **Sathwik Naik**
 
-GitHub: https://github.com/YOUR_USERNAME
+GitHub: https://github.com/sathwiko7
 
 LinkedIn: https://linkedin.com/in/sathwik-naik-6a3030319/
 
